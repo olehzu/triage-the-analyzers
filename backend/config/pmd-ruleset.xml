@@ -16,11 +16,13 @@
         <!-- D2: re-added below, narrowed to classes that are not JPA entities. -->
         <exclude name="UncommentedEmptyConstructor"/>
         <exclude name="UnnecessaryConstructor"/>
+        <!-- D4 (2026-11-13): GuardLogStatement is off. The rule exists because building a log
              message (string concatenation, toString(), expensive arguments) costs time even
              when the level is disabled. Project Pulse logs only through SLF4J with {} placeholders,
              which build the message only if the level is enabled. The four findings on 2026-11-01
              (ReminderService, WeeklyReminderScheduler, DocumentTemplateRegistry, AuthController)
              pass only getters and sizes as arguments, so a guard would add code and save nothing. -->
+        <exclude name="GuardLogStatement"/>
     </rule>
 
     <!-- D2 (2026-11-13): UncommentedEmptyConstructor and UnnecessaryConstructor are narrowed:
