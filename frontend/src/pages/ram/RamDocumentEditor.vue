@@ -668,7 +668,9 @@ function openAddArtifact() {
 
 function openEditArtifact(index: number) {
   artifactEditingIndex.value = index
-  artifactDraft.value = { ...draftArtifacts.value[index] }
+  // `index` is the `$index` of a row in the el-table bound to `draftArtifacts` (:data="draftArtifacts"),
+  // so it always names an existing element; noUncheckedIndexedAccess cannot see that guarantee.
+  artifactDraft.value = { ...draftArtifacts.value[index]! }
   artifactDialogVisible.value = true
 }
 
