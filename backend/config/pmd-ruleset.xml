@@ -13,5 +13,35 @@
          xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
     <description>PMD quickstart, with Project Pulse's decisions.</description>
     <rule ref="rulesets/java/quickstart.xml">
+        <!-- D2: re-added below, narrowed to classes that are not JPA entities. -->
+        <exclude name="UncommentedEmptyConstructor"/>
+        <exclude name="UnnecessaryConstructor"/>
+        <!-- D4 (2026-11-13): GuardLogStatement is off. The rule exists because building a log
+             message (string concatenation, toString(), expensive arguments) costs time even
+             when the level is disabled. Project Pulse logs only through SLF4J with {} placeholders,
+             which build the message only if the level is enabled. The four findings on 2026-11-01
+             (ReminderService, WeeklyReminderScheduler, DocumentTemplateRegistry, AuthController)
+             pass only getters and sizes as arguments, so a guard would add code and save nothing. -->
+        <exclude name="GuardLogStatement"/>
+    </rule>
+
+    <!-- D2 (2026-11-13): UncommentedEmptyConstructor and UnnecessaryConstructor are narrowed:
+         off for @Entity classes, enforced everywhere else. JPA requires every entity to have a
+         no-arg constructor, which Hibernate calls through reflection, so the constructor is never
+         unnecessary, and its reason is the annotation on the class. Keeping it explicit also means
+         it doesn't disappear when someone adds another constructor, which would only fail at
+         runtime. On 2026-11-01, 36 of the 40 findings were on entities. Outside entities nothing
+         requires the constructor, so the rules apply there. -->
+    <rule ref="category/java/documentation.xml/UncommentedEmptyConstructor">
+        <properties>
+            <property name="violationSuppressXPath"
+                      value="./ancestor-or-self::ClassDeclaration[1][pmd-java:hasAnnotation('jakarta.persistence.Entity')]"/>
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/UnnecessaryConstructor">
+        <properties>
+            <property name="violationSuppressXPath"
+                      value="./ancestor-or-self::ClassDeclaration[1][pmd-java:hasAnnotation('jakarta.persistence.Entity')]"/>
+        </properties>
     </rule>
 </ruleset>

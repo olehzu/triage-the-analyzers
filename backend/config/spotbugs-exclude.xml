@@ -7,4 +7,23 @@
 
      Unlike the baseline, this file may grow, but every entry is a reviewed decision. -->
 <FindBugsFilter>
+  <!-- D1 (2026-11-13): EI_EXPOSE_REP and EI_EXPOSE_REP2 are off project-wide. The rule guards an
+       object's internal state against callers it does not trust. In Project Pulse every
+       finding (219 on 2026-11-01) is one of three kinds of sharing the design depends on:
+       - Spring beans (25 classes): a constructor stores an injected collaborator, such as
+         SectionController.sectionService. Sharing that singleton is what dependency injection is for.
+       - JPA entities (23 classes): getters and setters on Hibernate-managed associations and
+         collections. Services change associations through the getter, for example
+         TeamService's from.getTeams().remove(team). A defensive copy would make that a silent
+         no-op, and replacing a managed collection in a setter breaks dirty checking and orphan removal.
+       - Records and response DTOs (14 classes) and request-scoped report objects: built per
+         request and serialized by Jackson straight away; no other code holds a reference to them.
+       Nothing outside the application runs in the JVM, so nothing untrusted can exploit the
+       shared references. -->
+  <Match>
+    <Or>
+      <Bug pattern="EI_EXPOSE_REP"/>
+      <Bug pattern="EI_EXPOSE_REP2"/>
+    </Or>
+  </Match>
 </FindBugsFilter>
